@@ -65,6 +65,29 @@ const selectCity = (event, input, list) => {
   }
 }
 
+const renderCheapDay = (cheapTicket) => {
+  console.log(cheapTicket);
+};
+
+const renderCheapYear = (cheapTickets) => {
+  console.log(cheapTickets);
+};
+
+const renderCheap = (data, date) => {
+  const cheapTicketYear = JSON.parse(data).best_prices;
+
+  const cheapTicketDay = cheapTicketYear.filter((item) => {
+    return item.depart_date === date;
+  });
+
+
+
+  renderCheapDay(cheapTicketDay);
+  renderCheapYear(cheapTicketYear);
+};
+
+//Обработчики событий
+
 inputCitiesFrom.addEventListener('input', () => {  //Навешиваем событие на инпут
   showCity(inputCitiesFrom, dropdownCitiesFrom);
 });
@@ -81,6 +104,29 @@ dropdownCitiesTo.addEventListener('click', () => {
   selectCity(event, inputCitiesTo, dropdownCitiesTo);
 });
 
+formSearch.addEventListener('submit', (event) => {
+  event.preventDefault();     //чтоб браузер не перезагружался
+
+  const cityFrom = city.find((item) => inputCitiesFrom.value === item.name);
+  const cityTo = city.find((item) => inputCitiesTo.value === item.name);
+
+  const formData = {
+    from: cityFrom.code,
+    to: cityTo.code,
+    when: inputDateDepart.value,
+  };
+
+  const requestData = '?depart_date=' + formData.when +
+    '&origin=' + formData.from +
+    '&destination=' + formData.to +
+    '&one_way=true&token=' + API_KEY;
+
+  getData(proxy + calendar + requestData, (response) => {
+    renderCheap(response, formData.when);
+  });
+
+});
+
 //Вызовы функций
 
 getData(citiesApi, (data) => {
@@ -90,3 +136,8 @@ getData(citiesApi, (data) => {
 // getData(proxy + citiesApi, (data) => {
 //   console.log(data);
 // });
+
+/* getData(proxy + calendar + '?depart_date=2020-05-25&origin=SVX&destination=KGD&one_way=true&token=' + API_KEY, (data) => {
+  const cheapTicket = JSON.parse(data).best_prices.filter(item => item.depart_date === '2020-05-25');
+  console.log(cheapTicket);
+}); */
